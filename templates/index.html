@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataTrace - OSINT Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 150, 255, 0.02) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00d4ff, #0099cc, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .logo::before {
+            content: "👁️";
+            margin-right: 15px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #8892b0;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 0;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .nav-tab {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            color: #8892b0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tab:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .nav-tab:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-tab:hover::before {
+            left: 100%;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.2), rgba(0, 153, 204, 0.2));
+            color: #00d4ff;
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #8892b0;
+        }
+
+        .search-btn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .search-btn:hover::before {
+            left: 100%;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .search-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .search-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .search-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .search-type-select {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .search-type-select:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .search-type-select option {
+            background: #1a1a2e;
+            color: #ffffff;
+        }
+
+        .results-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .download-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #8b5cf6, #a855f7);
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+        }
+
+        .info-card h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .info-label {
+            color: #8892b0;
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        .info-value {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .info-value.success {
+            color: #4ade80;
+        }
+
+        .info-value.warning {
+            color: #fbbf24;
+        }
+
+        .info-value.error {
+            color: #ef4444;
+        }
+
+        .breach-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .breach-item:hover {
+            transform: translateX(5px);
+            border-color: #ef4444;
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.2);
+        }
+
+        .breach-name {
+            color: #ef4444;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .breach-date {
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+
+        .breach-url {
+            color: #00d4ff;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .breach-url:hover {
+            text-decoration: underline;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #8892b0;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            color: #ef4444;
+            margin-bottom: 20px;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .connection-status.connected {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid #4ade80;
+            color: #4ade80;
+        }
+
+        .connection-status.disconnected {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-tab {
+                border-radius: 10px !important;
+            }
+            
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: unset;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-pattern"></div>
+    <div class="floating-particles" id="particles"></div>
+    <div class="connection-status disconnected" id="connectionStatus">🔴 Disconnected</div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">DataTrace</div>
+            <div class="subtitle">OSINT Intelligence Platform</div>
+        </div>
+
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="breach">🔍 Breach Search</div>
+            <div class="nav-tab" data-tab="seon">🛡️ SEON Checker</div>
+        </div>
+
+        <div id="breach" class="tab-content active">
+            <div class="search-section">
+                <div class="search-form">
+                    <input type="text" class="search-input" placeholder="Enter email or username..." id="breach-input">
+                    <button class="search-btn" id="breach-search-btn">Breach Search</button>
+                </div>
+                <div class="search-options">
+                    <select class="search-type-select" id="breach-source">
+                        <option value="snusbase">Snusbase</option>
+                        <option value="breachbase">Breachbase</option>
+                        <option value="hackcheck">Hackcheck</option>
+                        <option value="intelvault">Intelvault</option>
+                        <option value="leakcheck">Leakcheck</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-section" id="breach-results" style="display: none;">
+                <div class="results-header">
+                    <div class="results-title">Breach Information</div>
+                    <button class="download-btn" id="breach-download-btn">Download JSON</button>
+                </div>
+                <div id="breach-content"></div>
+            </div>
+        </div>
+
+        <div id="seon" class="tab-content">
+            <div class="search-section">
+                <div class="search-form">
+                    <input type="text" class="search-input" placeholder="Enter email or phone number..." id="seon-input">
+                    <button class="search-btn" id="seon-search-btn">SEON Check</button>
+                </div>
+                <div class="search-options">
+                    <select class="search-type-select" id="seon-type">
+                        <option value="email">Email</option>
+                        <option value="phone">Phone</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-section" id="seon-results" style="display: none;">
+                <div class="results-header">
+                    <div class="results-title">SEON Information</div>
+                    <button class="download-btn" id="seon-download-btn">Download JSON</button>
+                </div>
+                <div id="seon-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentResults = {};
+        let currentTab = 'breach';
+        let serverUrl = 'http://localhost:5000'; // Default Flask server URL
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            createParticles();
+            setupEventListeners();
+            checkServerConnection();
+        }
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+
+            // Search buttons
+            document.getElementById('breach-search-btn').addEventListener('click', searchBreach);
+            document.getElementById('seon-search-btn').addEventListener('click', searchSeon);
+
+            // Download buttons
+            document.getElementById('breach-download-btn').addEventListener('click', () => downloadResults('breach'));
+            document.getElementById('seon-download-btn').addEventListener('click', () => downloadResults('seon'));
+
+            // Enter key support
+            document.getElementById('breach-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchBreach();
+                }
+            });
+
+            document.getElementById('seon-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchSeon();
+                }
+            });
+        }
+
+        // Initialize particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Check server connection
+async function checkServerConnection() {
+    try {
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Connection timeout')), 5000)
+        );
+        
+        // Try to fetch from an endpoint that actually exists
+        const fetchPromise = fetch(`${serverUrl}/`, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
+        
+        if (response.ok || response.status === 404) {
+            // 404 is fine - server is running but endpoint doesn't exist
+            updateConnectionStatus(true);
+        } else {
+            updateConnectionStatus(false);
+        }
+    } catch (error) {
+        console.log('Server connection failed:', error);
+        updateConnectionStatus(false);
+    }
+}
+
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            if (connected) {
+                statusElement.className = 'connection-status connected';
+                statusElement.textContent = '🟢 Connected';
+            } else {
+                statusElement.className = 'connection-status disconnected';
+                statusElement.textContent = '🔴 Disconnected';
+            }
+        }
+
+        // Tab switching function
+        function switchTab(tabName) {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab and corresponding content
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            currentTab = tabName;
+        }
+
+        // Search functions
+        async function searchBreach() {
+            const input = document.getElementById('breach-input').value.trim();
+            const source = document.getElementById('breach-source').value;
+            
+            if (!input) {
+                alert('Please enter an email address');
+                return;
+            }
+
+            const btn = document.getElementById('breach-search-btn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+            btn.textContent = 'Searching...';
+
+            try {
+                let response;
+                if (source === 'leakcheck') {
+                    response = await fetch(`${serverUrl}/leakcheck?` + new URLSearchParams({
+                        term: input
+                    }));
+                } else {
+                    response = await fetch(`${serverUrl}/${source}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            search_type: 'email',
+                            query: input
+                        })
+                    });
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                currentResults.breach = data;
+                displayBreachResults(data, input);
+                updateConnectionStatus(true);
+            } catch (error) {
+                console.error('Error:', error);
+                displayError('breach', error.message);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                btn.textContent = 'Breach Search';
+            }
+        }
+
+        async function searchSeon() {
+            const input = document.getElementById('seon-input').value.trim();
+            const type = document.getElementById('seon-type').value;
+            
+            if (!input) {
+                alert('Please enter an email or phone number');
+                return;
+            }
+
+            const btn = document.getElementById('seon-search-btn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+
+            try {
+                let response;
+                if (type === 'email') {
+                    response = await fetch(`${serverUrl}/seon_email?` + new URLSearchParams({
+                        email: input
+                    }));
+                } else {
+                    response = await fetch(`${serverUrl}/seon_phone?` + new URLSearchParams({
+                        phone: input
+                    }));
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                currentResults.seon = data;
+                displaySeonResults(data, input, type);
+                updateConnectionStatus(true);
+            } catch (error) {
+                console.error('Error:', error);
+                displayError('seon', error.message);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                btn.textContent = 'SEON Check';
+            }
+        }
+
+        // Display functions
+        function displayBreachResults(data, email) {
+            const resultsDiv = document.getElementById('breach-results');
+            const contentDiv = document.getElementById('breach-content');
+            
+            if (data.error) {
+                contentDiv.innerHTML = `<div class="error-message">${data.error}</div>`;
+            } else {
+                let html = `
+                    <div class="info-card">
+                        <h3>Email Information</h3>
+                        <div class="info-row">
+                            <div class="info-label">Email:</div>
+                            <div class="info-value">${email}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Domain:</div>
+                            <div class="info-value">${email.split('@')[1]}</div>
+                        </div>
+                    </div>
+                `;
+
+                if (data.results && data.results.length > 0) {
+                    html += `
+                        <div class="info-card">
+                            <h3>Breaches Found</h3>
+                    `;
+                    data.results.forEach(breach => {
+                        html += `
+                            <div class="breach-item">
+                                <div class="breach-name">${breach.name || breach.source || 'Unknown Breach'}</div>
+                                <div class="breach-date">${breach.date || breach.breach_date || 'Unknown Date'}</div>
+                                ${breach.url ? `<a href="${breach.url}" class="breach-url" target="_blank">${breach.url}</a>` : ''}
+                                <div style="margin-top: 10px; font-size: 0.9em; color: #8892b0;">
+                                    ${breach.email ? `Email: ${breach.email}<br>` : ''}
+                                    ${breach.username ? `Username: ${breach.username}<br>` : ''}
+                                    ${breach.password ? `Password: ${breach.password}<br>` : ''}
+                                    ${breach.hash ? `Hash: ${breach.hash}<br>` : ''}
+                                    ${breach.phone ? `Phone: ${breach.phone}<br>` : ''}
+                                    ${breach.name ? `Name: ${breach.name}<br>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                // Handle different data structures
+                if (data.data && Array.isArray(data.data)) {
+                    html += `
+                        <div class="info-card">
+                            <h3>Additional Results</h3>
+                    `;
+                    data.data.forEach(item => {
+                        html += `
+                            <div class="breach-item">
+                                <div class="breach-name">${item.source || 'Unknown Source'}</div>
+                                <div style="margin-top: 10px; font-size: 0.9em; color: #8892b0;">
+                                    ${Object.entries(item).map(([key, value]) => 
+                                        key !== 'source' ? `${key}: ${value}<br>` : ''
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                // Display raw data if available
+                html += `
+                    <div class="info-card">
+                        <h3>Raw Data</h3>
+                        <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9em; max-height: 400px; overflow-y: auto;">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                
+                contentDiv.innerHTML = html;
+            }
+            
+            resultsDiv.style.display = 'block';
+        }
+
+function displaySeonResults(data, input, type) {
+    const resultsDiv = document.getElementById('seon-results');
+    const contentDiv = document.getElementById('seon-content');
+    
+    if (data.error) {
+        contentDiv.innerHTML = `<div class="error-message">${data.error}</div>`;
+    } else {
+        let html = '';
+
+        // Handle OSINTDog response structure - they might wrap data differently
+        let seonData = data;
+        
+        // Check if data is nested (common with API wrappers)
+        if (data.data) {
+            seonData = data.data;
+        } else if (data.result) {
+            seonData = data.result;
+        } else if (data.response) {
+            seonData = data.response;
+        }
+
+        function safeDisplay(value, defaultValue = 'Unknown') {
+            if (value === null || value === undefined) return defaultValue;
+            if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+            if (typeof value === 'object') {
+                if (Array.isArray(value)) {
+                    return value.length > 0 ? value.join(', ') : 'Empty';
+                }
+                return JSON.stringify(value, null, 2);
+            }
+            return String(value);
+        }
+
+        // Function to get CSS class for boolean values
+        function getBooleanClass(value, trueClass = 'success', falseClass = 'error') {
+            if (value === true) return trueClass;
+            if (value === false) return falseClass;
+            return '';
+        }
+
+        // Basic Info Block
+        html += `
+            <div class="info-card">
+                <h3>📧 ${type.charAt(0).toUpperCase() + type.slice(1)} Information</h3>
+                <div class="info-row">
+                    <div class="info-label">${type.charAt(0).toUpperCase() + type.slice(1)}:</div>
+                    <div class="info-value">${input}</div>
+                </div>
+            </div>
+        `;
+
+        // Separate blocks based on data categories
+        let emailDetails = {};
+        let socialMedia = {};
+        let phoneDetails = {};
+        let accountDetails = {};
+        let riskAssessment = {};
+        let otherData = {};
+
+        // Categorize the data
+        Object.entries(seonData).forEach(([key, value]) => {
+            if (key === 'error' || key === 'status' || key === 'message') return;
+            
+            // Email-related fields
+            if (key.includes('email') || key.includes('deliverable') || key.includes('domain') || key.includes('provider') || key.includes('free_provider') || key.includes('disposable')) {
+                emailDetails[key] = value;
+            }
+            // Social media fields
+            else if (key.includes('social') || key.includes('facebook') || key.includes('twitter') || key.includes('instagram') || key.includes('linkedin') || key.includes('github') || key.includes('skype') || key.includes('whatsapp')) {
+                socialMedia[key] = value;
+            }
+            // Phone-related fields
+            else if (key.includes('phone') || key.includes('carrier') || key.includes('line_type') || key.includes('country') || key.includes('region')) {
+                phoneDetails[key] = value;
+            }
+            // Account-related fields
+            else if (key.includes('account') || key.includes('profile') || key.includes('username') || key.includes('name') || key.includes('registered')) {
+                accountDetails[key] = value;
+            }
+            // Risk assessment fields
+            else if (key.includes('risk') || key.includes('fraud') || key.includes('spam') || key.includes('malicious') || key.includes('breach') || key.includes('valid') || key.includes('reputation')) {
+                riskAssessment[key] = value;
+            }
+            // Everything else
+            else {
+                otherData[key] = value;
+            }
+        });
+
+        // Email Details Block
+        if (Object.keys(emailDetails).length > 0) {
+            html += `
+                <div style="margin: 20px 0; padding: 10px; background: rgba(0, 212, 255, 0.1); border-radius: 8px; text-align: center; font-weight: bold; color: #00d4ff;">
+                    EMAIL DETAILS
+                </div>
+                <div class="info-card">
+                    <h3>Email Account Details</h3>
+            `;
+            Object.entries(emailDetails).forEach(([key, value]) => {
+                let displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let displayValue = safeDisplay(value);
+                let cssClass = '';
+                
+                if (key.includes('valid') || key.includes('deliverable')) {
+                    cssClass = getBooleanClass(value, 'success', 'error');
+                } else if (key.includes('disposable') || key.includes('risky')) {
+                    cssClass = getBooleanClass(value, 'error', 'success');
+                } else if (key.includes('free_provider')) {
+                    cssClass = getBooleanClass(value, 'warning', 'success');
+                }
+                
+                html += `
+                    <div class="info-row">
+                        <div class="info-label">${displayKey}:</div>
+                        <div class="info-value ${cssClass}">${displayValue}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        // Phone Details Block
+        if (Object.keys(phoneDetails).length > 0) {
+            html += `
+                <div style="margin: 20px 0; padding: 10px; background: rgba(0, 212, 255, 0.1); border-radius: 8px; text-align: center; font-weight: bold; color: #00d4ff;">
+                    PHONE DETAILS
+                </div>
+                <div class="info-card">
+                    <h3>Phone Information</h3>
+            `;
+            Object.entries(phoneDetails).forEach(([key, value]) => {
+                let displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let displayValue = safeDisplay(value);
+                
+                html += `
+                    <div class="info-row">
+                        <div class="info-label">${displayKey}:</div>
+                        <div class="info-value">${displayValue}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        // Social Media Block
+        if (Object.keys(socialMedia).length > 0) {
+            html += `
+                <div style="margin: 20px 0; padding: 10px; background: rgba(0, 212, 255, 0.1); border-radius: 8px; text-align: center; font-weight: bold; color: #00d4ff;">
+                    SOCIAL MEDIA ACCOUNTS
+                </div>
+                <div class="info-card">
+                    <h3>Social Media Presence</h3>
+            `;
+            Object.entries(socialMedia).forEach(([key, value]) => {
+                let displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let displayValue = safeDisplay(value);
+                let cssClass = getBooleanClass(value, 'success', '');
+                
+                html += `
+                    <div class="info-row">
+                        <div class="info-label">${displayKey}:</div>
+                        <div class="info-value ${cssClass}">${displayValue}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        // Account Details Block
+        if (Object.keys(accountDetails).length > 0) {
+            html += `
+                <div style="margin: 20px 0; padding: 10px; background: rgba(0, 212, 255, 0.1); border-radius: 8px; text-align: center; font-weight: bold; color: #00d4ff;">
+                    ACCOUNT DETAILS
+                </div>
+                <div class="info-card">
+                    <h3>Account Information</h3>
+            `;
+            Object.entries(accountDetails).forEach(([key, value]) => {
+                let displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let displayValue = safeDisplay(value);
+                
+                html += `
+                    <div class="info-row">
+                        <div class="info-label">${displayKey}:</div>
+                        <div class="info-value">${displayValue}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        // Risk Assessment Block
+        if (Object.keys(riskAssessment).length > 0) {
+            html += `
+                <div style="margin: 20px 0; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; text-align: center; font-weight: bold; color: #ef4444;">
+                    RISK ASSESSMENT
+                </div>
+                <div class="info-card">
+                    <h3>Security & Risk Analysis</h3>
+            `;
+            Object.entries(riskAssessment).forEach(([key, value]) => {
+                let displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let displayValue = safeDisplay(value);
+                let cssClass = '';
+                
+                if (key.includes('valid') || key.includes('deliverable')) {
+                    cssClass = getBooleanClass(value, 'success', 'error');
+                } else if (key.includes('risky') || key.includes('spam') || key.includes('malicious') || key.includes('breach') || key.includes('fraud')) {
+                    cssClass = getBooleanClass(value, 'error', 'success');
+                }
+                
+                html += `
+                    <div class="info-row">
+                        <div class="info-label">${displayKey}:</div>
+                        <div class="info-value ${cssClass}">${displayValue}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        // Other Data Block
+        if (Object.keys(otherData).length > 0) {
+            html += `
+                <div style="margin: 20px 0; padding: 10px; background: rgba(139, 92, 246, 0.1); border-radius: 8px; text-align: center; font-weight: bold; color: #8b5cf6;">
+                    ADDITIONAL DATA
+                </div>
+                <div class="info-card">
+                    <h3>Additional Information</h3>
+            `;
+            Object.entries(otherData).forEach(([key, value]) => {
+                let displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let displayValue = safeDisplay(value);
+                
+                html += `
+                    <div class="info-row">
+                        <div class="info-label">${displayKey}:</div>
+                        <div class="info-value">${displayValue}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        // Raw Data Block
+        html += `
+            <div style="margin: 20px 0; padding: 10px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; text-align: center; font-weight: bold; color: #4ade80;">
+                RAW DATA
+            </div>
+            <div class="info-card">
+                <h3>Raw Response Data</h3>
+                <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9em; max-height: 400px; overflow-y: auto;">${JSON.stringify(data, null, 2)}</pre>
+            </div>
+        `;
+        
+        contentDiv.innerHTML = html;
+    }
+    
+    resultsDiv.style.display = 'block';
+}
+
+        function displayError(type, message) {
+            const resultsDiv = document.getElementById(`${type}-results`);
+            const contentDiv = document.getElementById(`${type}-content`);
+            
+            contentDiv.innerHTML = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${message}
+                    <br><br>
+                    <small>Please check your connection and try again. Make sure the Flask server is running on ${serverUrl}</small>
+                </div>
+            `;
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        // Download function
+        function downloadResults(type) {
+            const data = currentResults[type];
+            if (!data) {
+                alert('No data to download');
+                return;
+            }
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}-results-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        setInterval(checkServerConnection, 60000);
+    </script>
+</body>
+</html>
